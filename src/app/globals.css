@@ -4,12 +4,44 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ---- Clyde self-hosted fonts ---- */
+@font-face {
+  font-family: "Oldschool Grotesk";
+  src: url("/fonts/OldschoolGrotesk-Medium.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Oldschool Grotesk";
+  src: url("/fonts/OldschoolGrotesk-Book.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Oldschool Grotesk Compact";
+  src: url("/fonts/OldschoolGroteskCompact-Book.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Recoleta";
+  src: url("/fonts/Recoleta-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Oldschool Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-compact: "Oldschool Grotesk Compact", "Oldschool Grotesk", sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-heading: "Recoleta", Georgia, serif;
+  --font-serif: "Recoleta", Georgia, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,13 +81,20 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Clyde palette */
+  --clyde-paper: #f6f6f4; /* page surface */
+  --clyde-ink: #000000; /* primary text */
+  --clyde-dark: #2d2d2d; /* dark CTA buttons */
+  --clyde-muted: #7f7f7f; /* "by" gray, secondary */
+  --clyde-yellow: #fff100; /* Cover Genius accent */
+
+  --background: oklch(0.973 0.002 106.4); /* #f6f6f4 */
+  --foreground: oklch(0 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0 0 0);
+  --primary: oklch(0.255 0 0); /* ~#2d2d2d dark button */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -123,8 +162,217 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Big editorial serif headings (Recoleta). */
+  .clyde-serif {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  /* Uppercase eyebrow / checklist labels. */
+  .clyde-eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 300;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  /* Warm aurora gradient used behind hero & section intros — slowly drifts. */
+  .clyde-aurora {
+    background:
+      radial-gradient(60% 55% at 30% 35%, #f9c46b 0%, rgba(249, 196, 107, 0) 60%),
+      radial-gradient(55% 50% at 78% 30%, #f7d6e0 0%, rgba(247, 214, 224, 0) 60%),
+      radial-gradient(60% 60% at 88% 75%, #e7c9f0 0%, rgba(231, 201, 240, 0) 60%),
+      radial-gradient(50% 50% at 12% 80%, #f6d2c0 0%, rgba(246, 210, 192, 0) 60%),
+      var(--clyde-paper);
+    background-size: 180% 180%;
+    animation: aurora-drift 22s ease-in-out infinite;
+  }
+  /* Apply to any element that already sets its own multi-radial `background`
+     inline (e.g. the stepped cards) to make that gradient drift. */
+  .aurora-animate {
+    background-size: 200% 200%;
+    animation: aurora-drift 20s ease-in-out infinite;
+  }
+  /* Soft multi-colour gradient used behind the Why-Clyde mockup cards
+     (pink → magenta → orange) — drifts slowly. */
+  .clyde-card-gradient {
+    background:
+      radial-gradient(60% 60% at 20% 18%, #e9b8f0 0%, rgba(233, 184, 240, 0) 60%),
+      radial-gradient(55% 55% at 82% 20%, #f7c9e0 0%, rgba(247, 201, 224, 0) 60%),
+      radial-gradient(70% 70% at 78% 88%, #f7941d 0%, rgba(247, 148, 29, 0) 62%),
+      radial-gradient(60% 60% at 18% 92%, #f25f9c 0%, rgba(242, 95, 156, 0) 60%),
+      #f3d9e6;
+    background-size: 200% 200%;
+    animation: aurora-drift 18s ease-in-out infinite;
+  }
+  /* Warm flowing mesh-gradient behind the "One platform" mosaic.
+     Replicates joinclyde.com's animated WebGL gradient (a soft warm bloom
+     over black): violet → magenta → coral → orange → gold, slowly drifting.
+     Two stacked layers drift in opposite directions for organic morphing. */
+  .clyde-mosaic-aurora {
+    background-color: #000;
+    background-image:
+      radial-gradient(38% 46% at 24% 32%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0) 62%),
+      radial-gradient(40% 48% at 34% 80%, rgba(224, 148, 219, 0.5) 0%, rgba(224, 148, 219, 0) 64%),
+      radial-gradient(40% 50% at 72% 30%, rgba(247, 152, 70, 0.5) 0%, rgba(247, 152, 70, 0) 62%),
+      radial-gradient(46% 54% at 84% 78%, rgba(251, 191, 34, 0.48) 0%, rgba(251, 191, 34, 0) 64%),
+      radial-gradient(38% 46% at 56% 58%, rgba(235, 150, 151, 0.4) 0%, rgba(235, 150, 151, 0) 60%);
+    background-size: 170% 170%;
+    animation: aurora-drift 24s ease-in-out infinite;
+  }
+  .clyde-mosaic-aurora-2 {
+    background-image:
+      radial-gradient(42% 50% at 78% 22%, rgba(242, 95, 156, 0.4) 0%, rgba(242, 95, 156, 0) 62%),
+      radial-gradient(46% 52% at 18% 70%, rgba(247, 148, 29, 0.36) 0%, rgba(247, 148, 29, 0) 64%),
+      radial-gradient(40% 48% at 60% 95%, rgba(168, 85, 247, 0.34) 0%, rgba(168, 85, 247, 0) 62%);
+    background-size: 200% 200%;
+    animation: aurora-drift-rev 31s ease-in-out infinite;
+  }
+
+  /* Lower-right purple/amber glow used inside the Why-Clyde black stage. */
+  .why-stage-glow {
+    background-image:
+      radial-gradient(45% 55% at 92% 78%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0) 60%),
+      radial-gradient(40% 50% at 100% 95%, rgba(247, 148, 29, 0.45) 0%, rgba(247, 148, 29, 0) 60%);
+    background-size: 160% 160%;
+    animation: aurora-drift 26s ease-in-out infinite;
+  }
+
+  /* Flowing multi-colour gradient text (orange → coral → violet). */
+  .clyde-gradient-text {
+    background: linear-gradient(90deg, #f7941d, #f25f9c, #a855f7, #f25f9c, #f7941d);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-flow 9s linear infinite;
+  }
+  /* Light footer aurora: warm watercolor pooling along the bottom of the
+     paper surface (orange → magenta → violet), fading to paper at the top.
+     Matches the white footer revealed behind the dark prefooter panel. */
+  .clyde-footer-light {
+    background-color: var(--clyde-paper);
+    background-image:
+      radial-gradient(60% 75% at 18% 118%, rgba(247, 148, 29, 0.85) 0%, rgba(247, 148, 29, 0) 60%),
+      radial-gradient(55% 70% at 48% 125%, rgba(242, 95, 156, 0.7) 0%, rgba(242, 95, 156, 0) 60%),
+      radial-gradient(60% 80% at 88% 112%, rgba(168, 85, 247, 0.6) 0%, rgba(168, 85, 247, 0) 62%),
+      radial-gradient(45% 55% at 100% 75%, rgba(247, 148, 29, 0.45) 0%, rgba(247, 148, 29, 0) 60%);
+    background-size: 160% 160%;
+    animation: aurora-drift 24s ease-in-out infinite;
+  }
+  /* Dark footer aurora: black on the left flowing into orange/pink/violet. */
+  .clyde-footer-glow {
+    background-color: #0b0a0c;
+    background-image:
+      radial-gradient(48% 60% at 80% 20%, rgba(247, 148, 29, 0.9) 0%, rgba(247, 148, 29, 0) 60%),
+      radial-gradient(52% 55% at 95% 60%, rgba(242, 95, 156, 0.75) 0%, rgba(242, 95, 156, 0) 62%),
+      radial-gradient(55% 60% at 72% 98%, rgba(168, 85, 247, 0.85) 0%, rgba(168, 85, 247, 0) 60%),
+      radial-gradient(40% 55% at 105% 85%, rgba(168, 85, 247, 0.6) 0%, rgba(168, 85, 247, 0) 60%);
+    background-size: 170% 170%;
+    animation: aurora-drift 24s ease-in-out infinite;
+  }
+}
+
+/* Hide scrollbars on horizontal marquees / carousels. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---- Scroll-driven animation hooks (GSAP) ----
+   `reveal-on` is added to <html> by an inline head script *before paint*
+   (only when motion is allowed), so reveal targets start hidden with no flash.
+   GSAP then fades them up via ScrollTrigger. Without JS / under reduced motion
+   the class is absent and everything renders normally. */
+html.reveal-on [data-reveal] {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Marquee rows skew with scroll velocity; keep the transform smooth. */
+[data-marquee-skew] {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-parallax],
+  [data-marquee-skew] {
+    transform: none !important;
+  }
+}
+
+/* Slow organic drift for aurora backgrounds. */
+@keyframes aurora-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Reverse organic drift (second aurora layer flows the opposite way). */
+@keyframes aurora-drift-rev {
+  0% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Horizontal flow for gradient text. */
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
+/* Seamless horizontal marquee (track is duplicated, so -50% loops). */
+@keyframes clyde-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clyde-aurora,
+  .aurora-animate,
+  .clyde-gradient-text,
+  .clyde-footer-glow,
+  .clyde-footer-light,
+  .clyde-mosaic-aurora,
+  .clyde-mosaic-aurora-2 {
+    animation: none;
   }
 }
